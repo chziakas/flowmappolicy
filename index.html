@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Aligning Flow Map Policies with Optimal Q-Guidance">
+  <meta name="keywords" content="FMQ, QGBS, Flow Map Policies, Offline-to-Online RL, Trust Region, Flow Matching, Reinforcement Learning">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FMQ: Aligning Flow Map Policies with Optimal Q-Guidance</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+  <style>
+    .figure-caption {
+      font-size: 0.92rem;
+      color: #555;
+      margin-top: 0.75rem;
+      line-height: 1.5;
+    }
+    .figure-caption strong { color: #333; }
+    .results-table-wrapper {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .results-table-wrapper table th {
+      background: #363636;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 0.65em 0.75em;
+    }
+    .results-table-wrapper table td {
+      padding: 0.55em 0.75em;
+      font-size: 0.88rem;
+    }
+    .results-table-wrapper table tfoot td {
+      background: #f5f5f5;
+      font-weight: 700;
+    }
+    .rollout-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .rollout-item {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      background: #fff;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .rollout-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+    .rollout-item img { width: 100%; display: block; }
+    .rollout-item .rollout-label {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: 'Google Sans', sans-serif;
+      color: #444;
+    }
+    section.alt-bg { background: #f7f8fc; }
+    .pseudocode {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      font-family: 'Castoro', 'Noto Sans', serif;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+    .pseudocode .algo-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .pseudocode .algo-line {
+      padding-left: 1.5em;
+    }
+    .pseudocode .algo-line-2 {
+      padding-left: 3em;
+    }
+    .pseudocode .algo-line-3 {
+      padding-left: 4.5em;
+    }
+    .pseudocode .algo-comment {
+      color: #888;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Title / Hero -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-widescreen">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Aligning Flow Map Policies with Optimal <i>Q</i>-Guidance</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://chziakas.github.io/">Christos Ziakas</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://www.imperial.ac.uk/people/a.russo">Alessandra Russo</a><sup>1</sup>,</span>
+            <span class="author-block">
+              <a href="https://joeybose.github.io/">Avishek Joey Bose</a><sup>1,2</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors" style="margin-top: 0.25rem;">
+            <span class="author-block"><sup>1</sup>Imperial College London,</span>
+            <span class="author-block"><sup>2</sup>Mila</span>
+          </div>
+
+          <div class="column has-text-centered" style="margin-top: 0.5rem;">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2605.12416"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="ai ai-arxiv"></i></span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://github.com/chziakas/fmq"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Teaser -->
+<section class="hero teaser" style="padding-top: 0;">
+  <div class="container is-max-widescreen">
+    <div class="hero-body" style="padding-top: 0;">
+      <figure class="image has-text-centered">
+        <img src="./static/images/fmq_teaser.gif"
+             alt="FMQ method overview"
+             style="max-width: 800px; margin: 0 auto; display: block; border-radius: 8px;">
+      </figure>
+      <h2 class="subtitle has-text-centered" style="margin-top: 1.25rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+        <strong>FMQ</strong> fine-tunes a one-step flow map policy using trust-region Q-gradient projection,
+        achieving state-of-the-art offline-to-online RL while being <strong>2.77&times;</strong> faster than prior methods.
+      </h2>
+    </div>
+  </div>
+</section>
+
+<!-- Abstract -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Generative policies based on expressive model classes, such as diffusion and flow
+            matching, are well-suited to complex control problems with highly multimodal
+            action distributions. Their expressivity, however, comes at a significant inference
+            cost: generating each action typically requires simulating many steps of the generative process, compounding latency across sequential decision-making rollouts.
+            We introduce <strong>flow map policies</strong>, a novel class of generative policies designed for
+            fast action generation by learning to take arbitrary-size jumps&mdash;including one-step
+            jumps&mdash;across the generative dynamics of existing flow-based policies. We
+            instantiate flow map policies for offline-to-online reinforcement learning (RL) and
+            formulate online adaptation as a trust-region optimization problem that improves
+            the critic's Q-value while remaining close to the offline policy. We theoretically
+            derive <strong>Flow Map Q-Guidance (FMQ)</strong>, a principled closed-form learning
+            target that is optimal for adapting offline flow map policies under a critic-guided
+            trust-region constraint. We further introduce <strong>Q-Guided Beam Search (QGBS)</strong>,
+            a stochastic flow-map sampler that combines renoising with beam search to enable
+            iterative inference-time refinement. Across 12 challenging robotic manipulation
+            and locomotion tasks from OGBench and RoboMimic, FMQ achieves state-of-the-art performance in offline-to-online RL, outperforming the previous one-step
+            policy MVP by a relative improvement of <strong>21.3%</strong> on the average success rate.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key Contributions -->
+<section class="section alt-bg">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 has-text-centered">Key Contributions</h2>
+        <div class="content has-text-justified">
+          <ul>
+            <li><strong>Flow map policies.</strong> We introduce flow map policies as a framework for learning one-step policies as two-time jump operators for flow-based generative actors.</li>
+            <li><strong>Algorithms.</strong> We introduce FMQ, which efficiently adapts flow map actors using optimal \(Q\)-guidance (Theorem 3.2). We further introduce QGBS, a stochastic inference-time refinement algorithm that combines flow map renoising, beam selection, and trust-region \(Q\)-guidance.</li>
+            <li><strong>State-of-the-art performance.</strong> Across 12 manipulation and locomotion tasks from OGBench and RoboMimic, FMQ outperforms prior SOTA offline-to-online baselines by a relative average of 21.3% while being on average &approx;2.77&times; more efficient during online adaptation.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Method Overview: Diagrams -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Method Overview</h2>
+        <div class="columns is-variable is-6" style="margin-top: 1rem;">
+          <div class="column is-half">
+            <figure>
+              <img src="./static/images/trust_region_final.png" alt="FMQ trust-region projection"
+                   style="width: 100%; border-radius: 8px;">
+            </figure>
+          </div>
+          <div class="column is-half">
+            <figure>
+              <img src="./static/images/renoising_final.png" alt="QGBS renoising beam search"
+                   style="width: 100%; border-radius: 8px;">
+            </figure>
+          </div>
+        </div>
+        <p class="figure-caption has-text-justified" style="max-width: 860px; margin: 0 auto;">
+          <strong>Figure 1.</strong>
+          <strong>(Left) FMQ:</strong> one-step flow map policy transports noise \(a_0\) to action \(a_1\);
+          then, trust-region projection displaces action \(a_1\) to \(a_1^*\) that maximizes \(Q\)-value.
+          <strong>(Right) QGBS</strong> (\(M{=}1, B{=}2\)): renoising corrupts \(a_1^*\) into \(B\) intermediate states \(a_{t'}\),
+          which the flow map policy then denoises to generate \(B\) candidate actions; candidates are updated via the optimal trust-region
+          displacement to maximize \(Q_\phi\), and the highest-valued \(M\) actions are selected.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Method: FMQ equation + pseudocode -->
+<section class="section alt-bg">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3 has-text-centered">Method</h2>
+
+        <h3 class="title is-4" style="margin-top: 1.5rem;">Flow Map Policy</h3>
+        <div class="content has-text-justified">
+          <div class="pseudocode" style="border-left: 4px solid #3273dc; background: #f5f7ff;">
+            <div class="algo-title">Definition (Flow-Map Policy)</div>
+            <p>
+              Let \(X_{r,t}: [0,1]^2 \times \mathcal{S} \times \mathbb{R}^d \to \mathbb{R}^d\) be a flow map that evolves
+              the action dynamics between any \((r,t) \in [0,1]\), conditioned on the MDP state \(s \in \mathcal{S}\)
+              and satisfying the jump condition \(X_{r,t}(a_r|s) = a_t\).
+              The flow-map policy is then the distribution induced by this map evaluated at time \(t=1\):
+            </p>
+            \[
+              \pi(a \mid s) = [X_{r,1}]_{\#}\, p_r(a_r \mid s)
+            \]
+          </div>
+          <p style="margin-top: 1rem;">
+            To parametrize the flow map, we use the <em>average action velocity</em> \(u_{r,t}\) between times \(r \leq t\):
+          </p>
+          \[
+            X_{r,t}(a_r \mid s) = a_r + (t-r)\, u_{r,t}(a_r \mid s), \quad
+            u_{r,t}(a_r \mid s) = \frac{1}{t-r}\int^t_r v_\tau(a_\tau \mid s)\, d\tau
+          \]
+        </div>
+
+        <h3 class="title is-4" style="margin-top: 2rem;">FMQ: Trust-Region Online Adaptation</h3>
+        <div class="content has-text-justified">
+          <p>
+            Given a pretrained offline flow map policy \(\pi^{\mathrm{off}}\) with average velocity \(u^{\mathrm{off}}_{r,1}(a_r|s)\),
+            FMQ constructs an optimal learning target by solving a trust-region problem. The optimal perturbation admits a closed-form solution:
+          </p>
+
+          <div class="pseudocode" style="border-left: 4px solid #3273dc; background: #f5f7ff;">
+            <div class="algo-title">Theorem 3.2 (Optimal Trust-Region Displacement)</div>
+            <p>
+              Consider a flow-map policy \(\pi^{\text{ref}}(\cdot|s)\) with underlying flow map \(X^{\text{ref}}_{r,1}\),
+              generating actions \(a_1 = a_r + (1-r)\,u^{\text{ref}}_{r,1}(a_r \mid s)\).
+              The optimal average velocity \(u^*_{r,1}\) that maximizes the first-order expansion of \(Q_\phi\) around \(a_1\),
+              subject to trust-region constraint \(\|u_{r,1} - u^{\text{ref}}_{r,1}\|_2 \le \eta\), is:
+            </p>
+            \[
+              u^*_{r,1}(a_r \mid s) = u^{\text{ref}}_{r,1}(a_r \mid s) + \eta\, \frac{\nabla_a Q_\phi(s, a_1)}{\|\nabla_a Q_\phi(s, a_1)\|_2}
+            \]
+          </div>
+
+          <p style="margin-top: 1rem;">
+            <em>Proof sketch.</em> Substituting the flow-map parameterization into a first-order Taylor expansion around \(a_1\)
+            reduces the problem to maximizing \(\langle \nabla_a Q_\phi(s, a_1),\, u_{r,1} - u^{\mathrm{ref}}_{r,1} \rangle\)
+            subject to \(\|u_{r,1} - u^{\mathrm{ref}}_{r,1}\|_2 \leq \eta\).
+            Solving the associated KKT conditions yields the optimal closed-form solution.
+          </p>
+          <p>
+            Setting \(\pi^{\text{ref}} = \pi^{\text{off}}\), the online policy is trained by regressing against this target with adaptive step size \(\eta_{\mathrm{eff}}\)
+            that shrinks in regions of high critic uncertainty.
+          </p>
+        </div>
+
+        <div class="pseudocode">
+          <div class="algo-title">Algorithm 1: Flow Map \(Q\)-Guidance (FMQ)</div>
+          <div><strong>Require:</strong> Offline policy \(u^{\text{off}}_{r,1}\), online policy \(u^\theta_{r,1}\), critics \(Q_{\phi_1}, Q_{\phi_2}\), buffer \(\mathcal{D}\)</div>
+          <div style="margin-top: 0.5rem;"><strong>for</strong> each environment step <strong>do</strong></div>
+          <div class="algo-line">\(a_1 \gets a_0 + u^\theta_{0,1}(a_0|s)\), &nbsp; \(a_0 \sim \mathcal{N}(0,I)\)</div>
+          <div class="algo-line">\(\mathcal{D} \gets \mathcal{D} \cup \{(s, a_1, r, s')\}\)</div>
+          <div class="algo-line">Sample batch from \(\mathcal{D}\); update critics</div>
+          <div class="algo-line">\(r \sim \mathcal{U}[0,1)\); &nbsp; \(a_0 \sim \mathcal{N}(0,I)\); &nbsp; \(a_r \gets (1{-}r)a_0 + r\,a_{\text{data}}\)</div>
+          <div class="algo-line">\(a_1 \gets a_r + (1{-}r)\,u^{\text{off}}_{r,1}(a_r|s)\)</div>
+          <div class="algo-line">\(g \gets \nabla_a Q_{\phi_1}(s,a_1) \;/\; (\|\nabla_a Q_{\phi_1}(s,a_1)\|_2 + \kappa_1)\)</div>
+          <div class="algo-line">\(\eta_{\text{eff}} \gets \eta \;/\; (1 + \beta\,\tilde{\delta}_{\text{critic}})\)</div>
+          <div class="algo-line">\(\theta \gets \theta - \alpha\,\nabla_\theta\|u^\theta_{r,1}(a_r|s) - \mathrm{sg}(u^{\text{off}}_{r,1}(a_r|s) + \eta_{\text{eff}}\,g)\|^2\)</div>
+          <div><strong>end for</strong></div>
+        </div>
+
+        <h3 class="title is-4" style="margin-top: 2rem;">QGBS: Inference-Time Refinement</h3>
+        <div class="content has-text-justified">
+          <p>At inference, QGBS iteratively refines flow map samples via:</p>
+          <ol>
+            <li><strong>Exploration:</strong> Re-noise \(M\) candidates to \(t' = \rho/(1+\rho)\) and generate \(B\) completions each via the flow map.</li>
+            <li><strong>Exploitation:</strong> Score all \(M \cdot B\) completions with \(Q_\phi\), keep top-\(M\), apply trust-region projection.</li>
+          </ol>
+          <p>
+            With \(K{=}1, B{=}4, M{=}4\), QGBS achieves peak performance using only <strong>20 NFE</strong>&mdash;37.5% fewer than best-of-32.
+          </p>
+        </div>
+
+        <div class="pseudocode">
+          <div class="algo-title">Algorithm 2: \(Q\)-Guided Beam Search (QGBS)</div>
+          <div><strong>Require:</strong> Flow map \(X^\theta_{r,1}\), critic \(Q_\phi\), state \(s\), beam \(M\), steps \(K\), branches \(B\), SNR \(\rho\), step size \(\eta\)</div>
+          <div style="margin-top: 0.5rem;">
+            \(t' \gets \rho/(1{+}\rho)\)
+          </div>
+          <div>Sample \(\{a_0^m\}_{m=1}^M \sim \mathcal{N}(0,I)\); &nbsp; \(a_1^m \gets a_0^m + u^\theta_{0,1}(a_0^m|s)\) for all \(m\)</div>
+          <div style="margin-top: 0.25rem;"><strong>for</strong> \(k = 1, \ldots, K\) <strong>do</strong></div>
+          <div class="algo-line"><strong>for</strong> \(m = 1, \ldots, M\) and \(b = 1, \ldots, B\) <strong>do</strong></div>
+          <div class="algo-line-2">\(\varepsilon^{mb} \sim \mathcal{N}(0,I)\)</div>
+          <div class="algo-line-2">\(\hat{a}_1^{mb} \gets X^\theta_{t',1}\!\left(t'\,a_1^m + (1{-}t')\,\varepsilon^{mb} \mid s\right)\) <span class="algo-comment">&triangleright; Re-noise &amp; complete</span></div>
+          <div class="algo-line"><strong>end for</strong></div>
+          <div class="algo-line">\(\{a_1^m\}_{m=1}^M \gets \mathrm{Top\text{-}}M\!\left(\{\hat{a}_1^{mb}\}_{m,b};\; Q_\phi(s, \hat{a}_1^{mb})\right)\) <span class="algo-comment">&triangleright; Select best \(M\) of \(M{\cdot}B\)</span></div>
+          <div class="algo-line">\(a_1^m \gets a_1^m + \eta\,\nabla_a Q_\phi(s, a_1^m) / \|\nabla_a Q_\phi(s, a_1^m)\|_2\) for all \(m\) <span class="algo-comment">&triangleright; Thm. 3.2</span></div>
+          <div><strong>end for</strong></div>
+          <div style="margin-top: 0.25rem;"><strong>return</strong> \(a_1^{\arg\max_m Q_\phi(s, a_1^m)}\)</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Results -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+
+        <h2 class="title is-3 has-text-centered">Main Results</h2>
+        <p class="has-text-centered" style="margin-bottom: 1rem; color: #666;">
+          Success rate (mean &plusmn; std over 5 seeds, 50 episodes). IQM with 95% CIs.
+        </p>
+        <div class="results-table-wrapper">
+          <table class="table is-striped is-hoverable is-fullwidth" style="margin-bottom: 0;">
+            <thead>
+              <tr>
+                <th>Environment</th>
+                <th>QC</th>
+                <th>MVP</th>
+                <th>FMQ (Ours)</th>
+                <th>FMQ + QGBS (Ours)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>can</td><td>0.88</td><td>0.83</td><td><strong>0.96</strong></td><td>0.97</td></tr>
+              <tr><td>square</td><td>0.89</td><td>0.82</td><td>0.94</td><td><strong>0.95</strong></td></tr>
+              <tr><td>cube-dbl-t3</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr>
+              <tr><td>cube-dbl-t4</td><td>0.92</td><td>0.98</td><td>0.98</td><td><strong>1.00</strong></td></tr>
+              <tr><td>cube-trl-t3</td><td>0.83</td><td>0.64</td><td>0.78</td><td><strong>0.84</strong></td></tr>
+              <tr><td>cube-trl-t4</td><td>0.37</td><td>0.32</td><td><strong>0.88</strong></td><td>0.87</td></tr>
+              <tr><td>scene-t4</td><td>0.99</td><td>0.92</td><td><strong>1.00</strong></td><td>0.99</td></tr>
+              <tr><td>scene-t5</td><td>0.96</td><td>0.90</td><td>0.98</td><td><strong>1.00</strong></td></tr>
+              <tr><td>hmaze-med-t3</td><td>0.65</td><td>0.47</td><td><strong>0.69</strong></td><td>0.58</td></tr>
+              <tr><td>hmaze-med-t4</td><td>0.04</td><td>0.00</td><td><strong>0.06</strong></td><td>0.06</td></tr>
+              <tr><td>amaze-gnt-t4</td><td>0.64</td><td>0.42</td><td><strong>0.80</strong></td><td>0.77</td></tr>
+              <tr><td>amaze-gnt-t5</td><td>0.91</td><td>0.82</td><td><strong>0.92</strong></td><td>0.92</td></tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>IQM [95% CI]</td>
+                <td>0.86 [0.84, 0.87]</td>
+                <td>0.75 [0.73, 0.77]</td>
+                <td>0.91 [0.89, 0.93]</td>
+                <td><strong>0.93 [0.91, 0.94]</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Training Curves -->
+<section class="section alt-bg">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Training Curves</h2>
+    <div class="has-text-centered" style="margin-top: 1.5rem;">
+      <figure>
+        <img src="./static/images/curves_final.png" alt="Training curves"
+             style="width: 100%; max-width: 1100px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+        <figcaption class="figure-caption" style="max-width: 960px; margin: 0.75rem auto 0;">
+          <strong>Figure 2.</strong> Offline-to-online learning curves for QC, MVP, and FMQ. All methods perform 1M offline followed by 1M online steps. Shaded regions indicate 95% CIs over 5 seeds.
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- Convergence Speedup -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3 has-text-centered">Convergence Speedup</h2>
+        <div class="content has-text-justified" style="max-width: 800px; margin: 1rem auto;">
+          <p>
+            FMQ reaches the highest success rate achievable by MVP <strong>2.77&times; faster</strong> on average during the online phase,
+            and up to <strong>6.14&times;</strong> on humanoidmaze-medium-t3. The Q-gradient alignment provides a stronger learning
+            signal than best-of-N selection, leading to faster policy improvement per environment step.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QGBS Efficiency -->
+<section class="section alt-bg">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3 has-text-centered">QGBS Efficiency</h2>
+        <p class="has-text-centered" style="margin-bottom: 1rem; color: #666;">
+          Inference-time compute vs. performance. NFE = M(1 + K&middot;B).
+        </p>
+        <div class="results-table-wrapper" style="max-width: 550px; margin: 0 auto;">
+          <table class="table is-striped is-hoverable is-fullwidth" style="margin-bottom: 0;">
+            <thead>
+              <tr>
+                <th>K</th>
+                <th>{B, M}</th>
+                <th>NFE</th>
+                <th>IQM</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>0</td><td>{1, 32}</td><td>32</td><td>0.91</td></tr>
+              <tr style="background-color: #e8f5e9; font-weight: bold;"><td>1</td><td>{4, 4}</td><td>20</td><td>0.93</td></tr>
+              <tr><td>1</td><td>{2, 8}</td><td>24</td><td>0.93</td></tr>
+              <tr><td>1</td><td>{1, 16}</td><td>32</td><td>0.92</td></tr>
+              <tr><td>2</td><td>{4, 4}</td><td>36</td><td>0.91</td></tr>
+              <tr><td>2</td><td>{4, 16}</td><td>144</td><td>0.90</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="has-text-centered" style="margin-top: 0.75rem; font-size: 0.9rem; color: #666;">
+          Optimal: K=1, B=4, M=4 achieves peak IQM with only 20 NFE (37.5% fewer than best-of-32).
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Rollout Visualizations -->
+<section class="section">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Task Rollouts</h2>
+    <p class="has-text-centered" style="margin-bottom: 1.5rem; color: #666;">
+      Visualizations of FMQ policy rollouts across all 12 evaluation environments.
+    </p>
+    <div class="rollout-grid">
+      <div class="rollout-item">
+        <img src="./static/images/rollout_can.png" alt="can rollout">
+        <div class="rollout-label">can (RoboMimic) &mdash; pick &amp; place can into bin</div>
+      </div>
+      <div class="rollout-item">
+        <img src="./static/images/rollout_square.png" alt="square rollout">
+        <div class="rollout-label">square (RoboMimic) &mdash; fit square nut onto peg</div>
+      </div>
+      <div class="rollout-item">
+        <img src="./static/images/rollout_cdp3.png" alt="cube-double-task3 rollout">
+        <div class="rollout-label">cube-double-t3 (OGBench) &mdash; rearrange 2 cubes</div>
+      </div>
+      <div class="rollout-item">
+        <img src="./static/images/rollout_cdp4.png" alt="cube-double-task4 rollout">
+        <div class="rollout-label">cube-double-t4 (OGBench) &mdash; swap 2 cubes</div>
+      </div>
+      <div class="rollout-item">
+        <img src="./static/images/rollout_ctrp3.png" alt="cube-triple-task3 rollout">
+        <div class="rollout-label">cube-triple-t3 (OGBench) &mdash; unstack 3 cubes</div>
+      </div>
+      <div class="rollout-item">
+        <img src="./static/images/rollout_ctrp4.png" alt="cube-triple-task4 rollout">
+        <div class="rollout-label">cube-triple-t4 (OGBench) &mdash; permute 3 cubes</div>
+      </div>
+      <div class="rollout-item">
+        <img src="./static/images/rollout_sc4.png" alt="scene-task4 rollout">
+        <div class="rollout-label">scene-t4 (OGBench) &mdash; open drawer, place cube</div>
+      </div>
+      <div class="rollout-item">
+        <img src="./static/images/rollout_sc5.png" alt="scene-task5 rollout">
+        <div class="rollout-label">scene-t5 (OGBench) &mdash; cube in drawer, open window</div>
+      </div>
+      <div class="rollout-item">
+        <img src="./static/images/rollout_hm3.png" alt="humanoidmaze-medium-task3 rollout">
+        <div class="rollout-label">hmaze-med-t3 (OGBench) &mdash; humanoid navigation</div>
+      </div>
+      <div class="rollout-item">
+        <img src="./static/images/rollout_hm4.png" alt="humanoidmaze-medium-task4 rollout">
+        <div class="rollout-label">hmaze-med-t4 (OGBench) &mdash; humanoid distant goal</div>
+      </div>
+      <div class="rollout-item">
+        <img src="./static/images/rollout_ag4.png" alt="antmaze-giant-task4 rollout">
+        <div class="rollout-label">amaze-gnt-t4 (OGBench) &mdash; ant cross giant maze</div>
+      </div>
+      <div class="rollout-item">
+        <img src="./static/images/rollout_ag5.png" alt="antmaze-giant-task5 rollout">
+        <div class="rollout-label">amaze-gnt-t5 (OGBench) &mdash; ant nearby goal</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BibTeX -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{ziakas2026fmq,
+  title={Aligning Flow Map Policies with Optimal Q-Guidance},
+  author={Ziakas, Christos and Russo, Alessandra and Bose, Avishek Joey},
+  journal={arXiv preprint arXiv:2605.12416},
+  year={2026}
+}</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Website template borrowed from <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>,
+            licensed under a
+            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
