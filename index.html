@@ -382,37 +382,39 @@
         <p class="has-text-centered" style="margin-bottom: 1rem; color: #666;">
           Success rate (mean &plusmn; std over 5 seeds, 50 episodes). IQM with 95% CIs.
         </p>
-        <div class="results-table-wrapper">
+        <div class="results-table-wrapper" style="overflow-x: auto;">
           <table class="table is-striped is-hoverable is-fullwidth" style="margin-bottom: 0;">
             <thead>
               <tr>
                 <th>Environment</th>
                 <th>QC</th>
                 <th>MVP</th>
+                <th>MVP + QGBS (Ours)</th>
                 <th>FMQ (Ours)</th>
                 <th>FMQ + QGBS (Ours)</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>can</td><td>0.88</td><td>0.83</td><td><strong>0.96</strong></td><td>0.97</td></tr>
-              <tr><td>square</td><td>0.89</td><td>0.82</td><td>0.94</td><td><strong>0.95</strong></td></tr>
-              <tr><td>cube-dbl-t3</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr>
-              <tr><td>cube-dbl-t4</td><td>0.92</td><td>0.98</td><td>0.98</td><td><strong>1.00</strong></td></tr>
-              <tr><td>cube-trl-t3</td><td>0.83</td><td>0.64</td><td>0.78</td><td><strong>0.84</strong></td></tr>
-              <tr><td>cube-trl-t4</td><td>0.37</td><td>0.32</td><td><strong>0.88</strong></td><td>0.87</td></tr>
-              <tr><td>scene-t4</td><td>0.99</td><td>0.92</td><td><strong>1.00</strong></td><td>0.99</td></tr>
-              <tr><td>scene-t5</td><td>0.96</td><td>0.90</td><td>0.98</td><td><strong>1.00</strong></td></tr>
-              <tr><td>hmaze-med-t3</td><td>0.65</td><td>0.47</td><td><strong>0.69</strong></td><td>0.58</td></tr>
-              <tr><td>hmaze-med-t4</td><td>0.04</td><td>0.00</td><td><strong>0.06</strong></td><td>0.06</td></tr>
-              <tr><td>amaze-gnt-t4</td><td>0.64</td><td>0.42</td><td><strong>0.80</strong></td><td>0.77</td></tr>
-              <tr><td>amaze-gnt-t5</td><td>0.91</td><td>0.82</td><td><strong>0.92</strong></td><td>0.92</td></tr>
+              <tr><td>can</td><td>0.88 &plusmn; 0.06</td><td>0.83 &plusmn; 0.07</td><td>0.87 &plusmn; 0.07</td><td><u>0.96 &plusmn; 0.04</u></td><td><strong>0.97 &plusmn; 0.03</strong></td></tr>
+              <tr><td>square</td><td>0.89 &plusmn; 0.04</td><td>0.82 &plusmn; 0.04</td><td>0.83 &plusmn; 0.05</td><td><u>0.94 &plusmn; 0.02</u></td><td><strong>0.95 &plusmn; 0.04</strong></td></tr>
+              <tr><td>cube-dbl-t3</td><td><strong>1.00 &plusmn; 0.00</strong></td><td><strong>1.00 &plusmn; 0.00</strong></td><td><strong>1.00 &plusmn; 0.00</strong></td><td><strong>1.00 &plusmn; 0.00</strong></td><td><strong>1.00 &plusmn; 0.00</strong></td></tr>
+              <tr><td>cube-dbl-t4</td><td>0.92 &plusmn; 0.05</td><td><u>0.98 &plusmn; 0.02</u></td><td><u>0.98 &plusmn; 0.02</u></td><td><u>0.98 &plusmn; 0.02</u></td><td><strong>1.00 &plusmn; 0.00</strong></td></tr>
+              <tr><td>cube-trl-t3</td><td><u>0.83 &plusmn; 0.08</u></td><td>0.64 &plusmn; 0.12</td><td>0.78 &plusmn; 0.12</td><td>0.78 &plusmn; 0.10</td><td><strong>0.84 &plusmn; 0.04</strong></td></tr>
+              <tr><td>cube-trl-t4</td><td>0.37 &plusmn; 0.26</td><td>0.32 &plusmn; 0.07</td><td>0.37 &plusmn; 0.09</td><td><strong>0.88 &plusmn; 0.07</strong></td><td><u>0.87 &plusmn; 0.05</u></td></tr>
+              <tr><td>scene-t4</td><td><u>0.99 &plusmn; 0.01</u></td><td>0.92 &plusmn; 0.02</td><td>0.98 &plusmn; 0.02</td><td><strong>1.00 &plusmn; 0.00</strong></td><td><u>0.99 &plusmn; 0.01</u></td></tr>
+              <tr><td>scene-t5</td><td>0.96 &plusmn; 0.02</td><td>0.90 &plusmn; 0.06</td><td>0.95 &plusmn; 0.05</td><td><u>0.98 &plusmn; 0.02</u></td><td><strong>1.00 &plusmn; 0.00</strong></td></tr>
+              <tr><td>hmaze-med-t3</td><td><u>0.65 &plusmn; 0.11</u></td><td>0.47 &plusmn; 0.10</td><td>0.53 &plusmn; 0.03</td><td><strong>0.69 &plusmn; 0.04</strong></td><td>0.58 &plusmn; 0.07</td></tr>
+              <tr><td>hmaze-med-t4</td><td><u>0.04 &plusmn; 0.03</u></td><td>0.00 &plusmn; 0.00</td><td>0.02 &plusmn; 0.02</td><td><strong>0.06 &plusmn; 0.03</strong></td><td><strong>0.06 &plusmn; 0.03</strong></td></tr>
+              <tr><td>amaze-gnt-t4</td><td>0.64 &plusmn; 0.12</td><td>0.42 &plusmn; 0.06</td><td>0.43 &plusmn; 0.04</td><td><strong>0.80 &plusmn; 0.06</strong></td><td><u>0.77 &plusmn; 0.03</u></td></tr>
+              <tr><td>amaze-gnt-t5</td><td><u>0.91 &plusmn; 0.05</u></td><td>0.82 &plusmn; 0.08</td><td>0.90 &plusmn; 0.06</td><td><strong>0.92 &plusmn; 0.04</strong></td><td><strong>0.92 &plusmn; 0.05</strong></td></tr>
             </tbody>
             <tfoot>
               <tr>
                 <td>IQM [95% CI]</td>
                 <td>0.86 [0.84, 0.87]</td>
                 <td>0.75 [0.73, 0.77]</td>
-                <td>0.91 [0.89, 0.93]</td>
+                <td>0.81 [0.78, 0.83]</td>
+                <td><u>0.91 [0.89, 0.93]</u></td>
                 <td><strong>0.93 [0.91, 0.94]</strong></td>
               </tr>
             </tfoot>
@@ -429,7 +431,7 @@
     <h2 class="title is-3 has-text-centered">Training Curves</h2>
     <div class="has-text-centered" style="margin-top: 1.5rem;">
       <figure>
-        <img src="./static/images/curves_final.png" alt="Training curves"
+        <img src="./static/images/training_curves.png" alt="Training curves"
              style="width: 100%; max-width: 1100px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
         <figcaption class="figure-caption" style="max-width: 960px; margin: 0.75rem auto 0;">
           <strong>Figure 2.</strong> Offline-to-online learning curves for QC, MVP, and FMQ. All methods perform 1M offline followed by 1M online steps. Shaded regions indicate 95% CIs over 5 seeds.
@@ -452,6 +454,15 @@
             signal than best-of-N selection, leading to faster policy improvement per environment step.
           </p>
         </div>
+        <div class="has-text-centered" style="margin-top: 1.5rem;">
+          <figure>
+            <img src="./static/images/speedup_main.png" alt="Convergence speedup of FMQ over MVP"
+                 style="width: 100%; max-width: 500px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+            <figcaption class="figure-caption" style="max-width: 600px; margin: 0.75rem auto 0;">
+              <strong>Figure 3.</strong> Convergence speedup of FMQ compared to MVP at success targets (&xi;), with 95% CIs.
+            </figcaption>
+          </figure>
+        </div>
       </div>
     </div>
   </div>
@@ -463,9 +474,15 @@
     <div class="columns is-centered">
       <div class="column is-full-width">
         <h2 class="title is-3 has-text-centered">QGBS Efficiency</h2>
-        <p class="has-text-centered" style="margin-bottom: 1rem; color: #666;">
-          Inference-time compute vs. performance. NFE = M(1 + K&middot;B).
-        </p>
+        <div class="content has-text-justified" style="max-width: 800px; margin: 1rem auto;">
+          <p>
+            The computational cost of QGBS is NFE = M(1 + K&middot;B) per action selection, where M is the number of initial candidates,
+            K is the number of renoising steps, and B is the number of completions per candidate. Best-of-N sampling corresponds to K=0 and M=N.
+            The optimal configuration (K=1, B=4, M=4) achieves a peak IQM of 0.93 with only <strong>20 NFE</strong>&mdash;37.5% fewer than best-of-32&mdash;suggesting
+            that diversifying candidates through renoising is more efficient than simply drawing more candidates.
+            Increasing K beyond 1 does not improve performance, indicating that only a modest increase in inference cost is needed for optimal results.
+          </p>
+        </div>
         <div class="results-table-wrapper" style="max-width: 550px; margin: 0 auto;">
           <table class="table is-striped is-hoverable is-fullwidth" style="margin-bottom: 0;">
             <thead>
