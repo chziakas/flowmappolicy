@@ -57,7 +57,7 @@
     }
     .rollout-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
     }
     .rollout-item {
@@ -71,7 +71,7 @@
       transform: translateY(-3px);
       box-shadow: 0 6px 20px rgba(0,0,0,0.12);
     }
-    .rollout-item img { width: 100%; display: block; }
+    .rollout-item img, .rollout-item video { width: 100%; display: block; }
     .rollout-item .rollout-label {
       padding: 0.5rem 0.75rem;
       font-size: 0.82rem;
@@ -269,6 +269,10 @@
 
         <h3 class="title is-4" style="margin-top: 1.5rem;">Flow Map Policy</h3>
         <div class="content has-text-justified">
+          <p>
+            We introduce flow map policies, a novel class of generative policies that
+            learn the unique two-time jump operator (<a href="https://arxiv.org/abs/2505.18825" style="color: hsl(204, 86%, 53%);">Boffi et al., 2025</a>) associated with the probability flow ODE of diffusion and
+            flow-matching policies.          </p>
           <div class="pseudocode" style="border-left: 4px solid #3273dc; background: #f5f7ff;">
             <div class="algo-title">Definition (Flow-Map Policy)</div>
             <p>
@@ -281,26 +285,20 @@
               \pi(a \mid s) = [X_{r,1}]_{\#}\, p_r(a_r \mid s)
             \]
           </div>
-          <p style="margin-top: 1rem;">
-            To parametrize the flow map, we use the <em>average action velocity</em> \(u_{r,t}\) between times \(r \leq t\):
-          </p>
-          \[
-            X_{r,t}(a_r \mid s) = a_r + (t-r)\, u_{r,t}(a_r \mid s), \quad
-            u_{r,t}(a_r \mid s) = \frac{1}{t-r}\int^t_r v_\tau(a_\tau \mid s)\, d\tau
-          \]
         </div>
 
         <h3 class="title is-4" style="margin-top: 2rem;">FMQ: Trust-Region Online Adaptation</h3>
         <div class="content has-text-justified">
           <p>
-            Given a pretrained offline flow map policy \(\pi^{\mathrm{off}}\) with average velocity \(u^{\mathrm{off}}_{r,1}(a_r|s)\),
-            FMQ constructs an optimal learning target by solving a trust-region problem. The optimal perturbation admits a closed-form solution:
+            For principled online adaptation of one-step flow map policies, we formulate a trust-region
+            optimization problem and derive an analytically optimal, closed-form method that aligns the action
+            distribution with \(Q\)-value guidance.
           </p>
 
           <div class="pseudocode" style="border-left: 4px solid #3273dc; background: #f5f7ff;">
             <div class="algo-title">Theorem 3.2 (Optimal Trust-Region Displacement)</div>
             <p>
-              Consider a flow-map policy \(\pi^{\text{ref}}(\cdot|s)\) with underlying flow map \(X^{\text{ref}}_{r,1}\),
+              Consider a flow map policy \(\pi^{\text{ref}}(\cdot|s)\) with underlying flow map \(X^{\text{ref}}_{r,1}\),
               generating actions \(a_1 = a_r + (1-r)\,u^{\text{ref}}_{r,1}(a_r \mid s)\).
               The optimal average velocity \(u^*_{r,1}\) that maximizes the first-order expansion of \(Q_\phi\) around \(a_1\),
               subject to trust-region constraint \(\|u_{r,1} - u^{\text{ref}}_{r,1}\|_2 \le \eta\), is:
@@ -310,16 +308,6 @@
             \]
           </div>
 
-          <p style="margin-top: 1rem;">
-            <em>Proof sketch.</em> Substituting the flow-map parameterization into a first-order Taylor expansion around \(a_1\)
-            reduces the problem to maximizing \(\langle \nabla_a Q_\phi(s, a_1),\, u_{r,1} - u^{\mathrm{ref}}_{r,1} \rangle\)
-            subject to \(\|u_{r,1} - u^{\mathrm{ref}}_{r,1}\|_2 \leq \eta\).
-            Solving the associated KKT conditions yields the optimal closed-form solution.
-          </p>
-          <p>
-            Setting \(\pi^{\text{ref}} = \pi^{\text{off}}\), the online policy is trained by regressing against this target with adaptive step size \(\eta_{\mathrm{eff}}\)
-            that shrinks in regions of high critic uncertainty.
-          </p>
         </div>
 
         <div class="pseudocode">
@@ -339,14 +327,13 @@
 
         <h3 class="title is-4" style="margin-top: 2rem;">QGBS: Inference-Time Refinement</h3>
         <div class="content has-text-justified">
-          <p>At inference, QGBS iteratively refines flow map samples via:</p>
-          <ol>
-            <li><strong>Exploration:</strong> Re-noise \(M\) candidates to \(t' = \rho/(1+\rho)\) and generate \(B\) completions each via the flow map.</li>
-            <li><strong>Exploitation:</strong> Score all \(M \cdot B\) completions with \(Q_\phi\), keep top-\(M\), apply trust-region projection.</li>
-          </ol>
           <p>
-            With \(K{=}1, B{=}4, M{=}4\), QGBS achieves peak performance using only <strong>20 NFE</strong>&mdash;37.5% fewer than best-of-32.
+            We additionally introduce <strong>Q-Guided Beam Search (QGBS)</strong>, a complementary inference-time refinement procedure that iteratively improves actions via two steps:
           </p>
+          <ol>
+            <li><strong>Exploration:</strong> Re-noise \(M\) candidates to an intermediate state \(t' = \rho/(1+\rho)\) and generate \(B\) completions each via the flow map, producing \(M \cdot B\) diverse candidate actions.</li>
+            <li><strong>Exploitation:</strong> Score all \(M \cdot B\) candidates with \(Q_\phi\), keep the top-\(M\), and apply the trust-region projection from Theorem 3.2.</li>
+          </ol>
         </div>
 
         <div class="pseudocode">
@@ -387,8 +374,8 @@
             <thead>
               <tr>
                 <th>Environment</th>
-                <th>QC</th>
-                <th>MVP</th>
+                <th><a href="https://arxiv.org/abs/2507.07969" style="color: #fff; text-decoration: underline;">QC</a> <span style="font-weight: 400; font-size: 0.78rem;">(Li et al., 2025)</span></th>
+                <th><a href="https://arxiv.org/abs/2602.13810" style="color: #fff; text-decoration: underline;">MVP</a> <span style="font-weight: 400; font-size: 0.78rem;">(Zhan et al., 2026)</span></th>
                 <th>MVP + QGBS (Ours)</th>
                 <th>FMQ (Ours)</th>
                 <th>FMQ + QGBS (Ours)</th>
@@ -520,52 +507,52 @@
     </p>
     <div class="rollout-grid">
       <div class="rollout-item">
-        <img src="./static/images/rollout_can.png" alt="can rollout">
-        <div class="rollout-label">can (RoboMimic) &mdash; pick &amp; place can into bin</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/can.mp4" type="video/mp4"></video>
+        <div class="rollout-label">can</div>
       </div>
       <div class="rollout-item">
-        <img src="./static/images/rollout_square.png" alt="square rollout">
-        <div class="rollout-label">square (RoboMimic) &mdash; fit square nut onto peg</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/square.mp4" type="video/mp4"></video>
+        <div class="rollout-label">square</div>
       </div>
       <div class="rollout-item">
-        <img src="./static/images/rollout_cdp3.png" alt="cube-double-task3 rollout">
-        <div class="rollout-label">cube-double-t3 (OGBench) &mdash; rearrange 2 cubes</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/cdp3.mp4" type="video/mp4"></video>
+        <div class="rollout-label">cube-double-t3</div>
       </div>
       <div class="rollout-item">
-        <img src="./static/images/rollout_cdp4.png" alt="cube-double-task4 rollout">
-        <div class="rollout-label">cube-double-t4 (OGBench) &mdash; swap 2 cubes</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/cdp4.mp4" type="video/mp4"></video>
+        <div class="rollout-label">cube-double-t4</div>
       </div>
       <div class="rollout-item">
-        <img src="./static/images/rollout_ctrp3.png" alt="cube-triple-task3 rollout">
-        <div class="rollout-label">cube-triple-t3 (OGBench) &mdash; unstack 3 cubes</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/ctrp3.mp4" type="video/mp4"></video>
+        <div class="rollout-label">cube-triple-t3</div>
       </div>
       <div class="rollout-item">
-        <img src="./static/images/rollout_ctrp4.png" alt="cube-triple-task4 rollout">
-        <div class="rollout-label">cube-triple-t4 (OGBench) &mdash; permute 3 cubes</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/ctrp4.mp4" type="video/mp4"></video>
+        <div class="rollout-label">cube-triple-t4</div>
       </div>
       <div class="rollout-item">
-        <img src="./static/images/rollout_sc4.png" alt="scene-task4 rollout">
-        <div class="rollout-label">scene-t4 (OGBench) &mdash; open drawer, place cube</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/sc4.mp4" type="video/mp4"></video>
+        <div class="rollout-label">scene-t4</div>
       </div>
       <div class="rollout-item">
-        <img src="./static/images/rollout_sc5.png" alt="scene-task5 rollout">
-        <div class="rollout-label">scene-t5 (OGBench) &mdash; cube in drawer, open window</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/sc5.mp4" type="video/mp4"></video>
+        <div class="rollout-label">scene-t5</div>
       </div>
       <div class="rollout-item">
-        <img src="./static/images/rollout_hm3.png" alt="humanoidmaze-medium-task3 rollout">
-        <div class="rollout-label">hmaze-med-t3 (OGBench) &mdash; humanoid navigation</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/hm3.mp4" type="video/mp4"></video>
+        <div class="rollout-label">hmaze-med-t3</div>
       </div>
       <div class="rollout-item">
-        <img src="./static/images/rollout_hm4.png" alt="humanoidmaze-medium-task4 rollout">
-        <div class="rollout-label">hmaze-med-t4 (OGBench) &mdash; humanoid distant goal</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/hm4.mp4" type="video/mp4"></video>
+        <div class="rollout-label">hmaze-med-t4</div>
       </div>
       <div class="rollout-item">
-        <img src="./static/images/rollout_ag4.png" alt="antmaze-giant-task4 rollout">
-        <div class="rollout-label">amaze-gnt-t4 (OGBench) &mdash; ant cross giant maze</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/ag4.mp4" type="video/mp4"></video>
+        <div class="rollout-label">amaze-gnt-t4</div>
       </div>
       <div class="rollout-item">
-        <img src="./static/images/rollout_ag5.png" alt="antmaze-giant-task5 rollout">
-        <div class="rollout-label">amaze-gnt-t5 (OGBench) &mdash; ant nearby goal</div>
+        <video autoplay loop muted playsinline><source src="./static/videos/ag5.mp4" type="video/mp4"></video>
+        <div class="rollout-label">amaze-gnt-t5</div>
       </div>
     </div>
   </div>
