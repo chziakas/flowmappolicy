@@ -271,7 +271,7 @@
         <div class="content has-text-justified">
           <p>
             We introduce flow map policies, a novel class of generative policies that
-            learn the unique two-time jump operator (<a href="https://arxiv.org/abs/2505.18825" style="color: hsl(204, 86%, 53%);">Boffi et al., 2025</a>) associated with the probability flow ODE of diffusion and
+            learn the unique two-time jump operator [<a href="#ref1" style="color: hsl(204, 86%, 53%);">1</a>] associated with the probability flow ODE of diffusion and
             flow-matching policies.          </p>
           <div class="pseudocode" style="border-left: 4px solid #3273dc; background: #f5f7ff;">
             <div class="algo-title">Definition (Flow-Map Policy)</div>
@@ -374,8 +374,8 @@
             <thead>
               <tr>
                 <th>Environment</th>
-                <th><a href="https://arxiv.org/abs/2507.07969" style="color: #fff; text-decoration: underline;">QC</a> <span style="font-weight: 400; font-size: 0.78rem;">(Li et al., 2025)</span></th>
-                <th><a href="https://arxiv.org/abs/2602.13810" style="color: #fff; text-decoration: underline;">MVP</a> <span style="font-weight: 400; font-size: 0.78rem;">(Zhan et al., 2026)</span></th>
+                <th>QC [<a href="#ref2" style="color: #adf;">2</a>]</th>
+                <th>MVP [<a href="#ref3" style="color: #adf;">3</a>]</th>
                 <th>MVP + QGBS (Ours)</th>
                 <th>FMQ (Ours)</th>
                 <th>FMQ + QGBS (Ours)</th>
@@ -558,8 +558,20 @@
   </div>
 </section>
 
+<!-- References -->
+<section class="section" id="References">
+  <div class="container is-max-desktop content">
+    <h2 class="title">References</h2>
+    <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 1.25rem 1.5rem; font-size: 0.92rem; line-height: 1.8;">
+      <div id="ref1" style="margin-bottom: 0.5rem;">[1] N. M. Boffi, M. S. Albergo, and E. Vanden-Eijnden. <em>How to build a consistency model: Learning flow maps via self-distillation.</em> 2025. <a href="https://arxiv.org/abs/2505.18825">arXiv:2505.18825</a></div>
+      <div id="ref2" style="margin-bottom: 0.5rem;">[2] Q. Li, Z. Zhou, and S. Levine. <em>Reinforcement learning with action chunking.</em> NeurIPS, 2025. <a href="https://arxiv.org/abs/2507.07969">arXiv:2507.07969</a></div>
+      <div id="ref3">[3] G. Zhan, L. Tao, P. Wang, Y. Wang, Y. Li, Y. Chen, H. Li, M. Tomizuka, and S. E. Li. <em>Mean flow policy with instantaneous velocity constraint for one-step action generation.</em> ICLR, 2026. <a href="https://arxiv.org/abs/2602.13810">arXiv:2602.13810</a></div>
+    </div>
+  </div>
+</section>
+
 <!-- BibTeX -->
-<section class="section" id="BibTeX">
+<section class="section" id="BibTeX" style="padding-top: 0;">
   <div class="container is-max-desktop content">
     <h2 class="title">BibTeX</h2>
     <pre><code>@article{ziakas2026fmq,
