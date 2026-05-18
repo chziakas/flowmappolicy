@@ -228,13 +228,14 @@
   </div>
 </section>
 
-<!-- Method Overview: Diagrams -->
-<section class="section">
+<!-- Method -->
+<section class="section alt-bg">
   <div class="container is-max-desktop">
-    <div class="columns is-centered has-text-centered">
+    <div class="columns is-centered">
       <div class="column is-full-width">
-        <h2 class="title is-3">Method Overview</h2>
-        <div class="columns is-variable is-6" style="margin-top: 1rem;">
+        <h2 class="title is-3 has-text-centered">Method</h2>
+
+        <div class="columns is-variable is-6 has-text-centered" style="margin-top: 1rem;">
           <div class="column is-half">
             <figure>
               <img src="./static/images/trust_region_final.png" alt="FMQ trust-region projection"
@@ -248,7 +249,7 @@
             </figure>
           </div>
         </div>
-        <p class="figure-caption has-text-justified" style="max-width: 860px; margin: 0 auto;">
+        <p class="figure-caption has-text-justified" style="max-width: 860px; margin: 0 auto 1.5rem;">
           <strong>Figure 1.</strong>
           <strong>(Left) FMQ:</strong> one-step flow map policy transports noise \(a_0\) to action \(a_1\);
           then, trust-region projection displaces action \(a_1\) to \(a_1^*\) that maximizes \(Q\)-value.
@@ -256,19 +257,8 @@
           which the flow map policy then denoises to generate \(B\) candidate actions; candidates are updated via the optimal trust-region
           displacement to maximize \(Q_\phi\), and the highest-valued \(M\) actions are selected.
         </p>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- Method: FMQ equation + pseudocode -->
-<section class="section alt-bg">
-  <div class="container is-max-desktop">
-    <div class="columns is-centered">
-      <div class="column is-full-width">
-        <h2 class="title is-3 has-text-centered">Method</h2>
-
-        <h3 class="title is-4" style="margin-top: 1.5rem;">Flow Map Policy</h3>
+        <h3 class="title is-4">Flow Map Policy</h3>
         <div class="content has-text-justified">
           <p>
             We introduce flow map policies, a novel class of generative policies that
